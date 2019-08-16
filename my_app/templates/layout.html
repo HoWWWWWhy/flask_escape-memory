@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" contesnt="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="description" content="">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='howwwwwhy32.ico') }}">
+
+    {% if title %}
+        <title>Escape Memory - {{ title }}</title>
+    {% else %}
+        <title>Escape Memory</title>
+    {% endif %}
+</head>
+
+<header>
+    <h1 class="banner">동물들과의 방탈출 추억</h1>
+</header>
+
+<nav>
+    <ul>
+        <li class="menu_left"><a href="{{ url_for('create_post') }}">추억 소환하기</a></li>
+        <li class="menu_left"><a href="{{ url_for('home') }}">Home</a></li>
+        <li class="menu_left"><a href="{{ url_for('about') }}">About</a></li>
+
+        {% if current_user.is_authenticated %}
+            <li><a class="menu_right" href="{{ url_for('logout') }}">로그아웃</a>
+            <li><a class="menu_right" href="{{ url_for('account') }}">마이페이지</a>
+        {% else %}
+            <li class="menu_right"><a href="{{ url_for('login') }}">로그인</a>
+            <li class="menu_right"><a href="{{ url_for('register') }}">회원가입</a>
+        {% endif %}
+    </ul>
+</nav>  
+
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flashes flashes-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}  
+
+    {% block content %}
+    {% endblock content %}
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+    
+{% block content %} 
+    {% if posts %}
+        {% for post in posts %}
+            <article class="card">
+                <div class="post-header">
+                    <span class="post-userinfo">
+                        <img class="profile-box-mini" src="{{ url_for('static', filename='profile_images/'+post.author.profile_image) }}">
+                        <span class="post-author">{{ post.author.username }}</span>
+                    </span>
+                    <span class="post-button-group">
+                        <a class="post-edit-button" href="{{ url_for('update_post', post_id=post.id) }}">U</a>
+                        <a class="post-edit-button js-post-delete-button" href="{{ url_for('delete_post', post_id=post.id) }}">D</a>
+                    </span> 
+                </div> 
+                <div class="post-main">
+                    <p class="post-date">created on {{ post.date_posted.strftime('%Y-%m-%d') }}</p>
+                    <img class="post-box" src="{{ url_for('static', filename='post_images/'+post.post_image) }}">
+                    <div class="post-result-{{ post.result }}">
+                        <p class="post-title">{{ post.title }}</p>
+                        <p class="post-content">{{ post.content }}</p>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>동물들과의 방탈출 추억이 없습니다.<br>추억을 소환해주시거나 어서 빨리 만들어주세요!!!</p>
+        <p style="color: red">애니메이션으로 만들어보기!!</p>
+    {% endif %}
+    {% if current_user.is_authenticated %}
+        <div class="dropdown">   
+            <a href="{{ url_for('my_posts', username=current_user.username) }}" class="floating-menu js-floating-menu">
+                <span class="tooltiptext">내 추억만 보기</span>
+            </a>                     
+            <div class="dropdown-content">
+                <a href="{{ url_for('my_posts', username=current_user.username) }}">내 추억만 보기</a>
+                <a href="#">친구와 함께한 추억</a>
+                {% if current_user.username in administrator_list %}
+                    <a href="{{ url_for('admin.index') }}">관리자 페이지</a>
+                {% endif %}
+            </div>            
+
+        </div> 
+        <script>file_name="{{ url_for('static', filename='profile_images/'+current_user.profile_image) }}"</script>
+        <script src="{{ url_for('static', filename='floating_menu.js') }}"></script>
+    {% endif %}
+{% endblock content %}
+

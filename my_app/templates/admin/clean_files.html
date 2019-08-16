@@ -1,0 +1,9 @@
+{% extends "admin/layout_admin.html" %}
+
+{% block body %}
+    <p><h3>Clean files which aren't be used now.</h3></p>
+    <div class="button">
+      <a href="{{ url_for('clean_profile_files') }}">Clean Unused User Profile Files</a>
+      <a href="{{ url_for('clean_post_files') }}">Clean Unused Post Files</a>
+    </div>     
+{% endblock body %}

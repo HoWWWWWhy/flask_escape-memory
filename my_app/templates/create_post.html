@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="form-group form-group-create">
+        <form enctype = "multipart/form-data" action="" method="post">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <legend class="field-legend">
+                    {{ legend }}
+                </legend>
+                <div class="field-group">
+                    <div class="field-group-form">
+                        <div class="form-each">
+                            {{ form.result.label(class="form-label") }}                           
+                            {{ form.result(class="radio-field") }}
+                        </div>        
+
+                        <div class="form-each">
+                            {{ form.title.label(class="form-label") }}
+                            {% if form.title.errors %}
+                                {{ form.title(class="text-field") }}   
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.title(class="text-field") }}
+                            {% endif %}
+                        </div>
+                    
+                        <div class="form-each">
+                            {{ form.content.label(class="form-label") }}
+                            {% if form.content.errors %}
+                                {{ form.content(class="text-field textarea-field") }}   
+                                <div class="invalid-feedback">
+                                    {% for error in form.content.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.content(class="text-field textarea-field") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-each">
+                            {{ form.post_image.label(class="form-label") }}
+                            {% if form.post_image.errors %}
+                                {{ form.post_image(class="file-field js-file-field") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.post_image.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}     
+                                </div>   
+                            {% else %}
+                                {{ form.post_image(class="file-field js-file-field") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="field-group-preview">
+                        <img class="post-box js-preview-box" src="{{ post_image }}">
+                        <p>
+                            Your Post Image
+                        </p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-submit">
+                {{ form.submit(class="button-submit")}}
+            </div>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='preview.js') }}"></script>
+{% endblock content %}
+

@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="profile-group">
+            <div class="profile-userinfo">
+                <span class="account-text">username</span>
+                <span>{{ current_user.username }}</span><br>
+                <span class="account-text">email</span>
+                <span>{{ current_user.email }}</span><br>
+                <span class="account-text">profile image</span>
+            </div>
+            <div class="profile-image-group">
+                
+                <div>
+                    <img class="profile-box" src="{{ profile_image }}">
+                    <p class="account-text">before(now)</p>
+                </div>
+                <div>
+                    <img class="arrow" src="{{ arrow_image }}">
+                </div>        
+                <div>
+                    <img class="profile-box js-preview-box" src="{{ profile_image_after }}">
+                    <p class="account-text">after</p>
+                </div>
+            </div> 
+    </div>
+   
+    <div class="form-group form-group-account">
+        <form enctype = "multipart/form-data" action="" method="post">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <legend class="field-legend">
+                    Update Profile
+                </legend>
+                <div class="field-group">
+                    <div class="field-group-form">
+                        <div class="form-each">
+                            {{ form.email.label(class="form-label") }}
+                            {% if form.email.errors %}
+                                {{ form.email(class="text-field") }}   
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="text-field") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-each">
+                            {{ form.profile_image.label(class="form-label") }}
+                            {% if form.profile_image.errors %}
+                                {{ form.profile_image(class="file-field js-file-field") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.profile_image.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}     
+                                </div>   
+                            {% else %}
+                                {{ form.profile_image(class="file-field js-file-field") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-submit">
+                {{ form.submit(class="button-submit")}}
+            </div>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='preview.js') }}"></script>  
+{% endblock content %}

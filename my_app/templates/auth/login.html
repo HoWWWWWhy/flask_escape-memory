@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="form-group form-group-login">
+        <form enctype = "multipart/form-data" action="" method="post">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <legend class="field-legend">
+                    로그인
+                </legend>
+                <div class="field-group">
+                    <div class="field-group-form">
+                        <div class="form-each">
+                            {{ form.username.label(class="form-label") }}
+                            {% if form.username.errors %}
+                                {{ form.username(class="text-field") }}   
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.username(class="text-field") }}
+                            {% endif %}
+                        </div>
+        
+                        <div class="form-each">
+                            {{ form.password.label(class="form-label") }}
+                            {% if form.password.errors %}
+                                {{ form.password(class="text-field") }}   
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.password(class="text-field") }}
+                            {% endif %}
+                        </div>
+        
+                        <div class="form-each form-check">
+                            {{ form.remember() }}
+                            {{ form.remember.label() }}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="form-submit">
+                {{ form.submit(class="button-submit")}}
+            </div>
+        </form>
+    </div>
+{% endblock content %}

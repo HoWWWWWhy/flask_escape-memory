@@ -1,0 +1,398 @@
+:root {
+    --main-menu-color: #ffeaa7;
+    --main-bg-color: #fdcb6e;
+}
+
+body {
+    margin: 0;
+}
+
+.banner {
+    background-color: var(--main-bg-color);
+    text-align: center;
+    margin: 0;
+    color: black;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ul {
+    list-style-type : none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--main-menu-color);
+}
+
+li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+li a:hover:not(.active) {
+    background-color: var(--main-bg-color);
+}
+
+.menu_left {
+    float: left;
+}
+
+.menu_right {
+    float: right;
+}
+
+.profile-group {
+    background-color: var(--main-menu-color);
+    width: 640px;
+    margin: 10px auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.profile-userinfo {
+    padding-left: 20px;
+}
+.profile-image-group {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.account-text {
+    background-color: white;
+    border-radius: 25em;
+    width: 150px;
+    display: inline-block;
+    text-align: center;
+    margin: 8px auto;
+    font-weight: bold;
+}
+.profile-box {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--main-bg-color);   
+}
+.profile-box-mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border-style: solid;
+    border-color: var(--main-bg-color);  
+    margin: 0 5px;
+}
+
+.post-box {
+    height: 353.5px;
+    width: 250px;
+}
+.arrow {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;    
+}
+.form-group {
+    margin: 20px auto;
+}
+.form-group-register {
+    width: 900px;
+}
+.form-group-login {
+    width: 640px;
+}
+.form-group-account {
+    width: 640px;
+}
+.form-group-create {
+    width: 700px;
+}
+
+
+.field-group {
+    display: flex;
+    flex-direction: row;
+    margin: 5px;
+}
+
+.field-group-form {
+    margin: 0;
+}
+
+.field-group-preview {
+    margin: 0 5px;
+    width: 250px;
+    text-align: center;
+}
+
+.form-each {
+    margin: 10px 5px;
+}
+.field-legend {
+    margin: 2px;
+}
+
+.form-submit {
+    width: 200px;
+    margin: 10px auto;
+}
+
+.button-submit {
+    width: 200px;
+    height: 30px;
+    cursor: pointer;
+    border: none;
+    background-color: #5cb85c;
+    border-radius: 20px;    
+}
+
+.post-header {
+    border-bottom-style: solid;
+    padding-bottom: 5px; 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;  
+    margin: 5px;  
+}
+.post-userinfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;     
+}
+.post-main {
+    margin: 5px;
+}
+.card {
+    width: 260px;
+    height: 550px;
+    border-style: dotted;
+    margin: 5px;
+    display: inline-block;
+}
+
+.post-author {
+    font-size: small;
+    font-weight: bold;
+}
+.post-button-group {
+    margin: 0 5px;
+}
+.post-edit-button {
+    cursor: pointer;
+    background-color: var(--main-bg-color);
+    border-radius: 5px; 
+    text-decoration: none;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    display: inline-block; 
+    font-weight: bold;  
+    color: black;
+}
+.post-date {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 3px auto;
+    text-align: end;
+    color: #636e72;
+}
+.post-title {
+    font-weight: bold;
+    margin: 0 5px;
+    margin-bottom: 5px;
+    padding-top: 5px;
+}
+.post-content {
+    overflow: auto;
+    height: 90px;
+    margin: 0 5px;
+}
+.post-result-success {
+    background-color: #2ecc71;
+}
+.post-result-failure {
+    background-color: #eb4d4b;
+}
+
+.invalid-feedback {
+    color: red;
+    font-size: small;
+}
+
+.flashes {
+    border-radius: .25em;    
+    text-align: center;
+    font-size: small;
+    font-weight: bold;
+    width: 500px;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+.flashes-success {
+    background-color: lightgreen;
+    color: green;
+}
+
+.flashes-error {
+    background-color: pink;
+    color: red;
+}
+
+.form-label {
+    display: inline-block;
+    width: 200px;
+    height: 25px;
+    background-color: var(--main-bg-color);
+    border-style: dashed;
+    border-width: 2px;
+    text-align: center;
+    font-weight: bold;
+}
+
+ul.radio-field {
+    background-color: transparent;
+    display: inline-flex;
+    flex-direction: row;
+}
+
+.text-field {
+    width: 370px;
+    height: 25px;
+    display: inline-block;
+    margin: 5px auto;
+}
+
+.textarea-field {
+    height: 185px;
+}
+
+.file-field {
+    display: inline-block;
+    margin: 5px auto;    
+}
+
+
+ /* Floating-Menu */
+.floating-menu-container{
+	position: fixed;
+	top: 120px;
+	right: 10px;
+	display: table;
+    visibility: hidden;
+}
+
+.floating-menu-text{
+	color:#FFF;
+	background:rgba(51,51,51,0.5);
+	display:table-cell;
+	vertical-align:middle;
+	padding:10px;
+    border-radius:3px;
+    font-size: small;
+}
+
+.floating-menu {
+	position:fixed;
+	width:60px;
+	height:60px;
+	top:110px;
+	right:120px;
+	border-radius:50px;
+    box-shadow: 2px 2px 3px #999;
+    display: inline-block;  
+}
+
+a.floating-menu + div.floating-menu-container {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s ease;
+}
+
+a.floating-menu:hover + div.floating-menu-container{
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: fixed;
+    background-color: #f1f1f1;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;    
+	top: 170px;
+	right: 20px;    
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: small;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+
+/* https://www.w3schools.com/css/css_tooltip.asp */
+  
+.floating-menu .tooltiptext {
+    visibility: hidden;
+    width: 100px;
+    background-color: var(--main-bg-color);
+    color: black;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    top: -3px;
+    left: 110%;
+    font-size: 11px;
+    font-weight: bold;
+}
+  
+.floating-menu .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent var(--main-bg-color) transparent transparent;
+}
+.floating-menu:hover .tooltiptext {
+    visibility: visible;
+}
+
+
+
+
+
+
+
+
