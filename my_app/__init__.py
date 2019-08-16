@@ -22,6 +22,6 @@ admin = Admin(app, name="Escape Memory's admin page")
 from my_app import routes
 
 if __name__ == '__main__':
-    #app.run()# for Heroku
-    app.run(debug=True)# for development
+    app.run()# for Heroku
+    #app.run(debug=True)# for development
     #app.run(host='0.0.0.0')

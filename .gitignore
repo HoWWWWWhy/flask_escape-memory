@@ -19,4 +19,3 @@ build/
 
 my_app/templates/home_temp_modal.html
 my_app/static/modal.temp.js
-my_app/static/style_temp_modal.css
