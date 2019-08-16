@@ -17,6 +17,6 @@ build/
 *.db
 
 
-flask_web/templates/home_temp_modal.html
-flask_web/static/modal.temp.js
-flask_web/static/style_temp_modal.css
+my_app/templates/home_temp_modal.html
+my_app/static/modal.temp.js
+my_app/static/style_temp_modal.css
