@@ -56,7 +56,8 @@ class CleanFilesView(BaseView):
 admin.add_view(DatabaseView(User, db.session, category=category_db))
 admin.add_view(DatabaseView(Post, db.session, category=category_db))
 
-path_project = op.join(op.dirname(__file__), '/HoWWWWWhy/flask_escape-memory/my_app')
+# path_project = op.join(op.dirname(__file__), '/HoWWWWWhy/flask_escape-memory/my_app')
+path_project = op.join(op.dirname(__file__), '/')
 admin.add_view(DirectoryView(path_project, '/', name="Directory", endpoint='directory'))
 # path_profile = op.join(op.dirname(__file__), 'static/profile_images')
 # path_post = op.join(op.dirname(__file__), 'static/post_images')
