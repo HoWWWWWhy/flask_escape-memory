@@ -12,7 +12,7 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
 
-    profile_image = FileField('Select Profile Image', validators=[FileAllowed(['jpg', 'png'])])
+    profile_image = FileField('Select Profile Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
     submit = SubmitField('Sign Up')
 
     # 이미 사용중인 아이디인지 확인
@@ -35,7 +35,7 @@ class LoginForm(FlaskForm):
 
 class UpdateAccountForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    profile_image = FileField('Select Profile Image', validators=[FileAllowed(['jpg', 'png'])])
+    profile_image = FileField('Select Profile Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
     submit = SubmitField('Update')
     
     # 이미 사용중인 이메일인지 확인
