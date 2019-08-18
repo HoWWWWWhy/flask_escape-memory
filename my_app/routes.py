@@ -223,12 +223,12 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
-            flash('You have been logged in!', 'success')
+            flash('로그인 되었습니다!', 'success')
             next_page = request.args.get('next')
             
             return redirect(next_page) if next_page else redirect(url_for('home'))# Ternary Operator in Python
         else:
-            flash('Login Unsuccessful. Please check again!', 'error')
+            flash('로그인에 실패하였습니다. Username과 Password를 다시 한 번 확인해주세요!', 'error')
     return render_template('/auth/login.html', title='Log in', form=form)
 
 @app.route('/auth/logout')
