@@ -49,5 +49,5 @@ class PostForm(FlaskForm):
     result = RadioField('탈출하셨나요?', choices=[('success', '성공'), ('failure', '실패')], default='success')
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=60)], render_kw={"placeholder": "테마 이름"})
     content = TextAreaField('Content', validators=[DataRequired()], render_kw={"placeholder": "후기를 입력하세요"})
-    post_image = FileField('Select Post Image', validators=[FileAllowed(['jpg', 'png'])])
+    post_image = FileField('Select Post Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
     submit = SubmitField('Post')
