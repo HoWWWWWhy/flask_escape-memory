@@ -2,6 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, abort
 from .forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from .db_models import User, Post
 from my_app import app, db, bcrypt, admin
+
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import BaseView, expose
@@ -13,19 +14,33 @@ import os.path as op
 
 # for Heroku & AWS S3
 import json, boto3
+S3_BUCKET = app.config['S3_BUCKET']
+ACCESS_KEY = app.config['S3_KEY']
+SECRET_KEY = app.config['S3_SECRET']
+
+s3_client = boto3.client('s3',
+    aws_access_key_id=ACCESS_KEY,
+    aws_secret_access_key=SECRET_KEY)
+
+
+@app.route('/show_s3')
+def show_s3():
+    
+    s3_resource = boto3.resource('s3')
+    my_bucket = s3_resource.Bucket(S3_BUCKET)
+    summaries = my_bucket.objects.all()
+    bucket_policy = s3_client.get_bucket_policy(Bucket=S3_BUCKET)
+
+    return render_template('view_bucket.html', my_bucket=my_bucket, files=summaries, bucket_policy=bucket_policy)
 
 @app.route('/sign_s3/')
 def sign_s3():
-    S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
-    
     file_name = request.args.get('file_name')
     file_type = request.args.get('file_type')
-    
-    s3 = boto3.client('s3')
-    
-    presigned_post = s3.generate_presigned_post(
-      Bucket = S3_BUCKET,
-      Key = file_name,
+    print('file_name:',file_name)
+    presigned_post = s3_client.generate_presigned_post(
+      S3_BUCKET,
+      file_name,
       Fields = {"acl": "public-read", "Content-Type": file_type},
       Conditions = [
         {"acl": "public-read"},
@@ -36,10 +51,8 @@ def sign_s3():
 
     return json.dumps({
       'data': presigned_post,
-      'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+      'url': 'https://%s.s3.ap-northeast-2.amazonaws.com/%s' % (S3_BUCKET, file_name)
     })
-
-
 
 # Admin Page
 administrator_list = ["howwwwwhy"]
@@ -147,7 +160,8 @@ def create_post():
     form = PostForm()
     if form.validate_on_submit():
         if form.post_image.data:
-            post_image = save_image(form.post_image.data, 'post_images')   
+            image_file = form.post_image.data
+            post_image = save_image(image_file, 'post_images')
             post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user, post_image=post_image)
         else:    
             post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user)

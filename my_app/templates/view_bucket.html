@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>AWS S3</h1>
+    <h3>Bucket Name: {{ my_bucket.name }}</h3>
+    <h4>Bucket Policy: {{ bucket_policy['Policy'] }}</h4>
+    {% for file in files %}
+        {{ file.key }}
+        {{ file.last_modified }}<br>
+    {% endfor %}
+{% endblock content %}

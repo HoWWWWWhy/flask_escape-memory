@@ -40,12 +40,16 @@ function getSignedRequest(file){
     
     const xhr = new XMLHttpRequest();
     
-    xhr.open("GET", "/sign_s3?file_name="+file.name+"&file_type="+file.type);
+    xhr.open("GET", "/sign_s3?file_name="+file.name+"&file_type="+file.type);// 요청 초기화
     xhr.onreadystatechange = function(){
+      console.log(xhr.readyState);
       if(xhr.readyState === 4){
         if(xhr.status === 200){
-          const response = JSON.parse(xhr.responseText);
+          const response = JSON.parse(xhr.responseText);   
+          console.log(response.data);
+          console.log(response.url);          
           uploadFile(file, response.data, response.url);
+
         }
         else{
           alert("Could not get signed URL.");
@@ -57,18 +61,19 @@ function getSignedRequest(file){
 
 function uploadFile(file, s3Data, url){
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", s3Data.url);
+    
     console.log(s3Data);
     let postData = new FormData();
     for(key in s3Data.fields){
       postData.append(key, s3Data.fields[key]);
     }
     postData.append('file', file);
-    console.log(postData);
+    console.log(postData.get("signature"));
+    console.log(postData.get("file"));
     console.log(xhr);
     xhr.onreadystatechange = function() {
+      console.log(xhr.readyState);
       if(xhr.readyState === 4){
-        console.log(url);
         if(xhr.status === 200 || xhr.status === 204){
             preview_box.src = url;
           //document.getElementById("avatar-url").value = url;
@@ -77,7 +82,10 @@ function uploadFile(file, s3Data, url){
           preview_box.src = url;
           alert("Could not upload file.");
         }
+          
      }
     };
+    console.log(postData);
+    xhr.open("POST", s3Data.url);
     xhr.send(postData);
 }
