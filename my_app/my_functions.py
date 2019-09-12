@@ -55,7 +55,7 @@ def post_to_aws_s3(image, save_foldername, save_objectname):
         #print(response['url'])  
         #print(image.content_type)
         image_path = os.path.join(app.root_path, 'static/'+save_foldername, save_objectname)
-        #print(image_path)
+        print(image_path)
         with open(image_path, 'rb') as f:
             #files = {'file': ('abc.png', f)}
             files = {'file': (save_objectname, f)}
