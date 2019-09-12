@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['S3_BUCKET'] = os.environ.get("S3_BUCKET_NAME")
 app.config['S3_KEY'] = os.environ.get("AWS_ACCESS_KEY_ID")
 app.config['S3_SECRET'] = os.environ.get("AWS_SECRET_ACCESS_KEY")
-#app.config['S3_LOCATION'] = 'http://{}.s3.amazonaws.com/'.format(os.environ.get("S3_BUCKET_NAME"))
+
 
 
 db = SQLAlchemy(app)

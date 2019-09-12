@@ -1,16 +1,14 @@
 const preview_box = document.querySelector(".js-preview-box");
 const preview_image = document.querySelector(".js-file-field");
 
-/*
-//for local development
 preview_image.onchange = (input) => {
     //console.log("onchange test");
     //console.log(input.target);
     const files = input.target.files;
     if(files.length > 0) {
         const reader = new FileReader();
-        const file = files[0];
-        //console.log(reader);
+        //const file = files[0];
+        //console.log(file);
         reader.onload = (e) => {
             //console.log(e.target.result);
             preview_box.src = e.target.result;
@@ -20,9 +18,10 @@ preview_image.onchange = (input) => {
         reader.readAsDataURL(input.target.files[0]);       
     }
 };
-*/
+
 
 //for Heroku & AWS S3
+/*
 preview_image.onchange = (input) => {
 
     const files = input.target.files;
@@ -47,7 +46,7 @@ function getSignedRequest(file){
         if(xhr.status === 200){
           const response = JSON.parse(xhr.responseText);   
           console.log(response.data);
-          console.log(response.url);          
+          console.log(response.url);        
           uploadFile(file, response.data, response.url);
 
         }
@@ -71,6 +70,7 @@ function uploadFile(file, s3Data, url){
     console.log(postData.get("signature"));
     console.log(postData.get("file"));
     console.log(xhr);
+    
     xhr.onreadystatechange = function() {
       console.log(xhr.readyState);
       if(xhr.readyState === 4){
@@ -79,7 +79,6 @@ function uploadFile(file, s3Data, url){
           //document.getElementById("avatar-url").value = url;
         }
         else{
-          preview_box.src = url;
           alert("Could not upload file.");
         }
           
@@ -87,5 +86,7 @@ function uploadFile(file, s3Data, url){
     };
     console.log(postData);
     xhr.open("POST", s3Data.url);
-    xhr.send(postData);
+    xhr.send(postData);// upload to s3
+    console.log("send!");
 }
+*/

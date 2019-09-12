@@ -6,6 +6,7 @@
     <h4>Bucket Policy: {{ bucket_policy['Policy'] }}</h4>
     {% for file in files %}
         {{ file.key }}
-        {{ file.last_modified }}<br>
+        {{ file.presigned_url }}
+        <img class="post-box" src="{{ file.presigned_url }}">
     {% endfor %}
 {% endblock content %}

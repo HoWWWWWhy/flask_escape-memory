@@ -6,47 +6,67 @@ from my_app import app, db, bcrypt, admin
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import BaseView, expose
-import secrets
 import os
-# from PIL import Image
+
 from flask_admin.contrib.fileadmin import FileAdmin
 import os.path as op
+from .my_functions import generate_filename, save_image, post_to_aws_s3
+import secrets
 
 # for Heroku & AWS S3
 import json, boto3
+# from botocore.client import Config
+
 S3_BUCKET = app.config['S3_BUCKET']
 ACCESS_KEY = app.config['S3_KEY']
 SECRET_KEY = app.config['S3_SECRET']
 
 s3_client = boto3.client('s3',
     aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY)
+    aws_secret_access_key=SECRET_KEY
+)
+#     config = Config(signature_version = 's3v4'),
 
-
+# 관리자 페이지로 옮기기
 @app.route('/show_s3')
 def show_s3():
-    
     s3_resource = boto3.resource('s3')
     my_bucket = s3_resource.Bucket(S3_BUCKET)
     summaries = my_bucket.objects.all()
+    my_objects = []
+    for summary in summaries:
+        my_object = {}
+        url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': S3_BUCKET,
+                'Key': summary.key
+            },                                  
+            ExpiresIn=60
+        )
+        my_object['key'] = summary.key
+        my_object['presigned_url'] = url
+        my_objects.append(my_object)
+        print(my_objects)
     bucket_policy = s3_client.get_bucket_policy(Bucket=S3_BUCKET)
 
-    return render_template('view_bucket.html', my_bucket=my_bucket, files=summaries, bucket_policy=bucket_policy)
+    return render_template('view_bucket.html', my_bucket=my_bucket, files=my_objects, bucket_policy=bucket_policy)
 
+# preview.js에서 바로 onchange 이벤트 시 s3에 업로드할 때 요청하는 페이지.
 @app.route('/sign_s3/')
 def sign_s3():
     file_name = request.args.get('file_name')
     file_type = request.args.get('file_type')
-    print('file_name:',file_name)
+
     presigned_post = s3_client.generate_presigned_post(
-      S3_BUCKET,
-      file_name,
-      Fields = {"acl": "public-read", "Content-Type": file_type},
-      Conditions = [
-        {"acl": "public-read"},
-        {"Content-Type": file_type}
-      ],
-      ExpiresIn = 3600
+        Bucket = S3_BUCKET,
+        Key = file_name,
+        Fields = {"acl": "public-read", "Content-Type": file_type},
+        Conditions = [
+            {"acl": "public-read"},
+            {"Content-Type": file_type}
+        ],
+        ExpiresIn = 600
     )
 
     return json.dumps({
@@ -154,19 +174,31 @@ def my_posts(username):
     posts = Post.query.filter_by(author=user).all()
     return render_template('home.html', posts=posts, title=username, administrator_list=administrator_list)
 
+
+
 @app.route('/create_post', methods=['GET', 'POST'])
 @login_required
 def create_post():
     form = PostForm()
+    save_post_foldername = 'post_images'
     if form.validate_on_submit():
         if form.post_image.data:
             image_file = form.post_image.data
-            post_image = save_image(image_file, 'post_images')
-            post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user, post_image=post_image)
+            save_post_objectname = generate_filename(image_file)
+            save_image(image_file, save_post_foldername, save_post_objectname)# for local development
+            # Post File to AWS S3 using presigned url --------------------------------------
+            # Generate a presigned S3 POST URL
+            post_to_aws_s3(image_file, save_post_foldername, save_post_objectname)
+            #print(image_file.read())
+
+            # ------------------------------------------------------------------------------            
+            
+            post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user, post_image=save_post_objectname)
         else:    
             post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user)
         db.session.add(post)
         db.session.commit()        
+
         flash('새로운 추억이 생성되었습니다!', 'success')
         return redirect(url_for('home'))
     post_image = url_for('static', filename='post_images/escape.jpg')
@@ -179,7 +211,7 @@ def update_post(post_id):
     selected_post = Post.query.get_or_404(post_id)
     if selected_post.author == current_user:
         form = PostForm()
-
+        save_post_foldername = 'post_images'
         if request.method == 'GET':
             form.title.data = selected_post.title
             form.content.data = selected_post.content
@@ -187,8 +219,10 @@ def update_post(post_id):
 
         elif form.validate_on_submit():
             if form.post_image.data:
-                post_image = save_image(form.post_image.data, 'post_images')   
-                selected_post.post_image = post_image
+                image_file = form.post_image.data
+                save_post_objectname = generate_filename(image_file)
+                save_image(image_file, save_post_foldername, save_post_objectname)# for local development                 
+                selected_post.post_image = save_post_objectname
         
                 selected_post.title = form.title.data
                 selected_post.content = form.content.data
@@ -219,34 +253,21 @@ def delete_post(post_id):
 def about():
     return render_template('about.html', title='About')
 
-
-def save_image(form_image, save_foldername):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_image.filename)
-    image_filename = random_hex + f_ext
-    image_path = os.path.join(app.root_path, 'static/'+save_foldername, image_filename)
-
-    # output_size = (200, 200)
-    # im = Image.open(form_image)
-    # im.thumbnail(output_size)
-    # im.save(image_path)
-
-    form_image.save(image_path)
-
-    return image_filename
-
 @app.route('/auth/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
     form = RegistrationForm()
-
+    save_profile_foldername = 'profile_images'
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         if form.profile_image.data:
-            profile_image = save_image(form.profile_image.data, 'profile_images')   
-            user = User(username=form.username.data, email=form.email.data, password=hashed_password, profile_image=profile_image)
+            image_file = form.profile_image.data
+            save_profile_objectname = generate_filename(image_file)
+            save_image(image_file, save_profile_foldername, save_profile_objectname)# for local development
+  
+            user = User(username=form.username.data, email=form.email.data, password=hashed_password, profile_image=save_profile_objectname)
         else:     
             user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
@@ -284,13 +305,17 @@ def logout():
 @login_required
 def account():
     form = UpdateAccountForm()
+    save_profile_foldername = 'profile_images'
     if request.method == 'GET':
         form.email.data = current_user.email  
 
     elif form.validate_on_submit():  
         if form.profile_image.data:
-            profile_image = save_image(form.profile_image.data, 'profile_images')   
-            current_user.profile_image = profile_image
+            image_file = form.profile_image.data
+            save_profile_objectname = generate_filename(image_file)
+            save_image(image_file, save_profile_foldername, save_profile_objectname)# for local development
+ 
+            current_user.profile_image = save_profile_objectname
         current_user.email = form.email.data
         db.session.commit()
         flash('프로필이 업데이트 되었습니다.', 'success')
