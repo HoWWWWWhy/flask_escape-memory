@@ -59,9 +59,7 @@ def post_to_aws_s3(image, save_foldername, save_objectname):
         with open(image_path, 'rb') as f:
             #files = {'file': ('abc.png', f)}
             files = {'file': (save_objectname, f)}
-
-        #files = {'file': (save_objectname, image.read())}
             http_response = requests.post(response['url'], data=response['fields'], files=files)
-        #print(image.read())
+
     except ClientError as e:
         print("error")
