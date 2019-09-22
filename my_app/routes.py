@@ -15,7 +15,7 @@ import secrets
 
 # for Heroku & AWS S3
 import json, boto3
-# from botocore.client import Config
+from botocore.client import Config
 
 S3_BUCKET = app.config['S3_BUCKET']
 ACCESS_KEY = app.config['S3_KEY']
@@ -23,9 +23,9 @@ SECRET_KEY = app.config['S3_SECRET']
 
 s3_client = boto3.client('s3',
     aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY
+    aws_secret_access_key=SECRET_KEY,
+    config = Config(signature_version = 's3v4')
 )
-#     config = Config(signature_version = 's3v4'),
 
 # 관리자 페이지로 옮기기
 @app.route('/show_s3')
