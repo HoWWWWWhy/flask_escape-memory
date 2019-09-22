@@ -71,7 +71,8 @@ def sign_s3():
 
     return json.dumps({
       'data': presigned_post,
-      'url': 'https://%s.s3.ap-northeast-2.amazonaws.com/%s' % (S3_BUCKET, file_name)
+      'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+      #'url': 'https://%s.s3.ap-northeast-2.amazonaws.com/%s' % (S3_BUCKET, file_name)
     })
 
 # Admin Page
