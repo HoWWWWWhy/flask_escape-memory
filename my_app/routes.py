@@ -189,7 +189,7 @@ def create_post():
             save_image(image_file, save_post_foldername, save_post_objectname)# for local development
             # Post File to AWS S3 using presigned url --------------------------------------
             # Generate a presigned S3 POST URL
-            #post_to_aws_s3(image_file, save_post_foldername, save_post_objectname)
+            post_to_aws_s3(image_file, save_post_foldername, save_post_objectname)
             #print(image_file.read())
 
             # ------------------------------------------------------------------------------            
