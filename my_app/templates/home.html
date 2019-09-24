@@ -6,7 +6,8 @@
             <article class="card">
                 <div class="post-header">
                     <span class="post-userinfo">
-                        <img class="profile-box-mini" src="{{ url_for('static', filename='profile_images/'+post.author.profile_image) }}">
+                        {# <img class="profile-box-mini" src="{{ url_for('static', filename='profile_images/'+post.author.profile_image) }}"> #}
+                        <img class="profile-box-mini" src="{{ s3_profiles[loop.index-1] }}">
                         <span class="post-author">{{ post.author.username }}</span>
                     </span>
                     <span class="post-button-group">
@@ -16,7 +17,8 @@
                 </div> 
                 <div class="post-main">
                     <p class="post-date">created on {{ post.date_posted.strftime('%Y-%m-%d') }}</p>
-                    <img class="post-box" src="{{ url_for('static', filename='post_images/'+post.post_image) }}">
+                    {# <img class="post-box" src="{{ url_for('static', filename='post_images/'+post.post_image) }}"> #}
+                    <img class="post-box" src="{{ s3_posts[loop.index-1] }}">
                     <div class="post-result-{{ post.result }}">
                         <p class="post-title">{{ post.title }}</p>
                         <p class="post-content">{{ post.content }}</p>

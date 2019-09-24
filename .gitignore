@@ -16,7 +16,4 @@ build/
 .env
 *.db
 
-
-my_app/templates/home_temp_modal.html
-my_app/static/modal.temp.js
 *.csv

@@ -5,8 +5,8 @@
     <h3>Bucket Name: {{ my_bucket.name }}</h3>
     <h4>Bucket Policy: {{ bucket_policy['Policy'] }}</h4>
     {% for file in files %}
-        {{ file.key }}
-        {{ file.presigned_url }}
+        <p>{{ file.key }}</p>
+        <p>{{ file.presigned_url }}</p>
         <img class="post-box" src="{{ file.presigned_url }}">
     {% endfor %}
 {% endblock content %}

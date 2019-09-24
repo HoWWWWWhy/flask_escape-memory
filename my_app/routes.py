@@ -10,72 +10,59 @@ import os
 
 from flask_admin.contrib.fileadmin import FileAdmin
 import os.path as op
-from .my_functions import generate_filename, save_image, post_to_aws_s3
+from .my_functions import generate_filename, save_image, post_to_aws_s3, get_from_aws_s3, get_all_s3_objects, delete_s3_objects
 import secrets
 
 # for Heroku & AWS S3
-import json, boto3
-from botocore.client import Config
+#import json, boto3
+#from botocore.client import Config
 
-S3_BUCKET = app.config['S3_BUCKET']
-ACCESS_KEY = app.config['S3_KEY']
-SECRET_KEY = app.config['S3_SECRET']
+#S3_BUCKET = app.config['S3_BUCKET']
+#ACCESS_KEY = app.config['S3_KEY']
+#SECRET_KEY = app.config['S3_SECRET']
 
-s3_client = boto3.client('s3',
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY,
-    config = Config(signature_version = 's3v4')
-)
+#s3_client = boto3.client('s3',
+#    aws_access_key_id=ACCESS_KEY,
+#    aws_secret_access_key=SECRET_KEY,
+#    config = Config(signature_version = 's3v4')
+#)
 
 # 관리자 페이지로 옮기기
-@app.route('/show_s3')
-def show_s3():
-    s3_resource = boto3.resource('s3')
-    my_bucket = s3_resource.Bucket(S3_BUCKET)
-    summaries = my_bucket.objects.all()
-    my_objects = []
-    for summary in summaries:
-        my_object = {}
-        url = s3_client.generate_presigned_url(
-            'get_object',
-            Params={
-                'Bucket': S3_BUCKET,
-                'Key': summary.key
-            },                                  
-            ExpiresIn=60
-        )
-        my_object['key'] = summary.key
-        my_object['presigned_url'] = url
-        my_objects.append(my_object)
-        print(my_objects)
-    bucket_policy = s3_client.get_bucket_policy(Bucket=S3_BUCKET)
-
-    return render_template('view_bucket.html', my_bucket=my_bucket, files=my_objects, bucket_policy=bucket_policy)
+#@app.route('/show_s3')
+#def show_s3():
+#    s3_resource = boto3.resource('s3')
+#    my_bucket = s3_resource.Bucket(S3_BUCKET)
+#    my_objects = get_from_aws_s3()
+#    print(my_objects)
+#    bucket_policy = s3_client.get_bucket_policy(Bucket=S3_BUCKET)
+#
+#    return render_template('view_bucket.html', my_bucket=my_bucket, files=my_objects, bucket_policy=bucket_policy)
 
 # preview.js에서 바로 onchange 이벤트 시 s3에 업로드할 때 요청하는 페이지.
-@app.route('/sign_s3/')
-def sign_s3():
-    file_name = request.args.get('file_name')
-    file_type = request.args.get('file_type')
+#@app.route('/sign_s3/')
+#def sign_s3():
+#    file_name = request.args.get('file_name')
+#    file_type = request.args.get('file_type')
+#
+#    presigned_post = s3_client.generate_presigned_post(
+#        Bucket = S3_BUCKET,
+#        Key = file_name,
+#        Fields = {"acl": "public-read", "Content-Type": file_type},
+#        Conditions = [
+#            {"acl": "public-read"},
+#            {"Content-Type": file_type}
+#        ],
+#        ExpiresIn = 600
+#    )
+#
+#    return json.dumps({
+#      'data': presigned_post,
+#      'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+#      #'url': 'https://%s.s3.ap-northeast-2.amazonaws.com/%s' % (S3_BUCKET, file_name)
+#    })
 
-    presigned_post = s3_client.generate_presigned_post(
-        Bucket = S3_BUCKET,
-        Key = file_name,
-        Fields = {"acl": "public-read", "Content-Type": file_type},
-        Conditions = [
-            {"acl": "public-read"},
-            {"Content-Type": file_type}
-        ],
-        ExpiresIn = 600
-    )
 
-    return json.dumps({
-      'data': presigned_post,
-      'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
-      #'url': 'https://%s.s3.ap-northeast-2.amazonaws.com/%s' % (S3_BUCKET, file_name)
-    })
-
-# Admin Page
+############################## Admin Page ##############################
 administrator_list = ["howwwwwhy"]
 category_db = "DATABASE"
 # category_files = "IMAGE FILES"
@@ -160,20 +147,97 @@ def clean_post_files():
 
     return redirect(url_for('clean_files.index'))
 
-# User Page
+@app.route('/admin/clean_files/clean_s3_profile_files')
+def clean_s3_profile_files():
+    profile_foldername = 'profile_images'
+
+    used_images_tuple = User.query.with_entities(User.profile_image).all()
+    used_images = [profile_foldername + '/' + used_image[0] for used_image in used_images_tuple]# tuple을 list로 변환
+    used_images.append(profile_foldername + '/' + "howwwwwhy.png")# 기본 이미지는 삭제하면 안됨
+    print(used_images)
+    s3_profile_objects = get_all_s3_objects(profile_foldername)# s3에서 가져온 리스트
+    print(s3_profile_objects)   
+
+    # 가져온 리스트에서 DB에 없는 파일 삭제, 기본 이미지는 삭제하면 안됨
+    unused_objects = list(filter(lambda x: x not in used_images, s3_profile_objects))
+    print(unused_objects)
+
+    if len(unused_objects) > 0:
+        is_deleted = delete_s3_objects(unused_objects)
+
+    return redirect(url_for('clean_files.index'))
+
+@app.route('/admin/clean_files/clean_s3_post_files')
+def clean_s3_post_files():
+    post_foldername = 'post_images'
+
+    used_images_tuple = Post.query.with_entities(Post.post_image).all()
+    used_images = [post_foldername + '/' + used_image[0] for used_image in used_images_tuple]# tuple을 list로 변환
+    used_images.append(post_foldername + '/' + "escape.jpg")# 기본 이미지는 삭제하면 안됨
+
+    s3_post_objects = get_all_s3_objects(post_foldername)# s3에서 가져온 리스트
+    print(s3_post_objects)
+    
+    # 가져온 리스트에서 DB에 없는 파일 삭제, 기본 이미지는 삭제하면 안됨
+    unused_objects = list(filter(lambda x: x not in used_images, s3_post_objects))
+    print(unused_objects)
+
+    if len(unused_objects) > 0:
+        is_deleted = delete_s3_objects(unused_objects)
+
+    return redirect(url_for('clean_files.index'))
+
+
+
+############################## User Page ##############################
 @app.route('/')
 @app.route('/home')
 def home():
+    post_foldername = 'post_images'
+    profile_foldername = 'profile_images'
+
+    # AWS S3에서 가져온 파일리스트들의 url을 DB 저장 순으로 정렬하기
+    # 주의: S3에는 그동안 저장된 모든 것들이 있고, DB는 최종 결과만 있음. DB 파일 이름과 일치하는 것 찾기
+
     posts = Post.query.all()
-    return render_template('home.html', posts=posts, title='Home', administrator_list=administrator_list)
+    s3_post_key_list = [post_foldername + '/' + post.post_image for post in posts]
+    s3_profile_key_list = [profile_foldername + '/' + post.author.profile_image for post in posts]
+    #print(s3_post_key_list)
+    #print(s3_profile_key_list)
+
+    s3_post_objects = get_from_aws_s3(s3_post_key_list)
+    s3_profile_objects = get_from_aws_s3(s3_profile_key_list)
+    #print(s3_profile_objects)
+    
+    # generator expression
+    s3_post_url_list = [s3_post_object['presigned_url'] for s3_post_object in s3_post_objects]
+    s3_profile_url_list = [s3_profile_object['presigned_url'] for s3_profile_object in s3_profile_objects]
+    #print(s3_url_list)
+
+    return render_template('home.html', posts=posts, s3_posts=s3_post_url_list, s3_profiles=s3_profile_url_list,
+                            title='Home', administrator_list=administrator_list)
 
 @app.route('/home/<string:username>')
 @login_required
 def my_posts(username):
+    post_foldername = 'post_images'
+    profile_foldername = 'profile_images'
+
     # posts = Post.query.join(User).filter(User.username==current_user.username).all()
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(author=user).all()
-    return render_template('home.html', posts=posts, title=username, administrator_list=administrator_list)
+
+    s3_post_key_list = [post_foldername + '/' + post.post_image for post in posts]
+    s3_profile_key_list = [profile_foldername + '/' + post.author.profile_image for post in posts]
+
+    s3_post_objects = get_from_aws_s3(s3_post_key_list)
+    s3_profile_objects = get_from_aws_s3(s3_profile_key_list)
+
+    s3_post_url_list = [s3_post_object['presigned_url'] for s3_post_object in s3_post_objects]
+    s3_profile_url_list = [s3_profile_object['presigned_url'] for s3_profile_object in s3_profile_objects]
+
+    return render_template('home.html', posts=posts, s3_posts=s3_post_url_list, s3_profiles=s3_profile_url_list,
+                            title=username, administrator_list=administrator_list)
 
 
 
@@ -197,6 +261,7 @@ def create_post():
             post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user, post_image=save_post_objectname)
         else:    
             post = Post(title=form.title.data, content=form.content.data, result=form.result.data, author=current_user)
+        
         db.session.add(post)
         db.session.commit()        
 
@@ -223,11 +288,13 @@ def update_post(post_id):
                 image_file = form.post_image.data
                 save_post_objectname = generate_filename(image_file)
                 save_image(image_file, save_post_foldername, save_post_objectname)# for local development                 
+                post_to_aws_s3(image_file, save_post_foldername, save_post_objectname)
+
                 selected_post.post_image = save_post_objectname
-        
-                selected_post.title = form.title.data
-                selected_post.content = form.content.data
-                selected_post.result = form.result.data
+
+            selected_post.title = form.title.data
+            selected_post.content = form.content.data
+            selected_post.result = form.result.data
             db.session.commit()
             flash('추억이 업데이트 되었습니다!', 'success')            
             return redirect(url_for('home'))
@@ -267,7 +334,8 @@ def register():
             image_file = form.profile_image.data
             save_profile_objectname = generate_filename(image_file)
             save_image(image_file, save_profile_foldername, save_profile_objectname)# for local development
-  
+            post_to_aws_s3(image_file, save_profile_foldername, save_profile_objectname)
+
             user = User(username=form.username.data, email=form.email.data, password=hashed_password, profile_image=save_profile_objectname)
         else:     
             user = User(username=form.username.data, email=form.email.data, password=hashed_password)
@@ -315,7 +383,8 @@ def account():
             image_file = form.profile_image.data
             save_profile_objectname = generate_filename(image_file)
             save_image(image_file, save_profile_foldername, save_profile_objectname)# for local development
- 
+            post_to_aws_s3(image_file, save_profile_foldername, save_profile_objectname)
+
             current_user.profile_image = save_profile_objectname
         current_user.email = form.email.data
         db.session.commit()

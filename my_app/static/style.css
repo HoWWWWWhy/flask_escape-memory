@@ -210,11 +210,15 @@ li a:hover:not(.active) {
     margin: 0 5px;
     margin-bottom: 5px;
     padding-top: 5px;
+    overflow: auto;
+    height: 20px;
+    font-size: 15px;
 }
 .post-content {
     overflow: auto;
     height: 90px;
     margin: 0 5px;
+    font-size: 15px;
 }
 .post-result-success {
     background-color: #2ecc71;

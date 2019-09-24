@@ -5,5 +5,8 @@
     <div class="button">
       <a href="{{ url_for('clean_profile_files') }}">Clean Unused User Profile Files</a>
       <a href="{{ url_for('clean_post_files') }}">Clean Unused Post Files</a>
+      <br>
+      <a href="{{ url_for('clean_s3_profile_files') }}">Clean Unused S3 User Profile Files</a>
+      <a href="{{ url_for('clean_s3_post_files') }}">Clean Unused S3 Post Files</a>      
     </div>     
 {% endblock body %}
