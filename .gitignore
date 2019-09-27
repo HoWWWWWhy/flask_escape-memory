@@ -17,3 +17,6 @@ build/
 *.db
 
 *.csv
+
+post_images/
+profile_images/

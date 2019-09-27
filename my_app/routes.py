@@ -78,17 +78,6 @@ class DatabaseView(ModelView):
         else:
             return redirect(url_for('login', next='/admin'))
 
-class DirectoryView(FileAdmin):
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.username in administrator_list
-
-    def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        if current_user.is_authenticated:
-            abort(403)# 403 is "Forbidden" error
-        else:
-            return redirect(url_for('login', next='/admin/directory'))
-
 class CleanFilesView(BaseView):
     @expose('/')
     def index(self):
@@ -106,14 +95,6 @@ class CleanFilesView(BaseView):
 
 admin.add_view(DatabaseView(User, db.session, category=category_db))
 admin.add_view(DatabaseView(Post, db.session, category=category_db))
-
-# path_project = op.join(op.dirname(__file__), '/HoWWWWWhy/flask_escape-memory/my_app')
-path_project = op.join(op.dirname(__file__), '/')
-admin.add_view(DirectoryView(path_project, '/', name="Directory", endpoint='directory'))
-# path_profile = op.join(op.dirname(__file__), 'static/profile_images')
-# path_post = op.join(op.dirname(__file__), 'static/post_images')
-# admin.add_view(FileAdmin(path_profile, '/static/', category=category_files))
-# admin.add_view(FileAdmin(path_post, '/static/', category=category_files))
 
 admin.add_view(CleanFilesView(name='Clean Files', endpoint='clean_files'))
 
@@ -154,13 +135,13 @@ def clean_s3_profile_files():
     used_images_tuple = User.query.with_entities(User.profile_image).all()
     used_images = [profile_foldername + '/' + used_image[0] for used_image in used_images_tuple]# tuple을 list로 변환
     used_images.append(profile_foldername + '/' + "howwwwwhy.png")# 기본 이미지는 삭제하면 안됨
-    print(used_images)
+    #print(used_images)
     s3_profile_objects = get_all_s3_objects(profile_foldername)# s3에서 가져온 리스트
-    print(s3_profile_objects)   
+    #print(s3_profile_objects)   
 
     # 가져온 리스트에서 DB에 없는 파일 삭제, 기본 이미지는 삭제하면 안됨
     unused_objects = list(filter(lambda x: x not in used_images, s3_profile_objects))
-    print(unused_objects)
+    #print(unused_objects)
 
     if len(unused_objects) > 0:
         is_deleted = delete_s3_objects(unused_objects)
@@ -176,11 +157,11 @@ def clean_s3_post_files():
     used_images.append(post_foldername + '/' + "escape.jpg")# 기본 이미지는 삭제하면 안됨
 
     s3_post_objects = get_all_s3_objects(post_foldername)# s3에서 가져온 리스트
-    print(s3_post_objects)
+    #print(s3_post_objects)
     
     # 가져온 리스트에서 DB에 없는 파일 삭제, 기본 이미지는 삭제하면 안됨
     unused_objects = list(filter(lambda x: x not in used_images, s3_post_objects))
-    print(unused_objects)
+    #print(unused_objects)
 
     if len(unused_objects) > 0:
         is_deleted = delete_s3_objects(unused_objects)
@@ -212,10 +193,17 @@ def home():
     # generator expression
     s3_post_url_list = [s3_post_object['presigned_url'] for s3_post_object in s3_post_objects]
     s3_profile_url_list = [s3_profile_object['presigned_url'] for s3_profile_object in s3_profile_objects]
-    #print(s3_url_list)
+    #print(s3_profile_url_list)
+
+    # 유저 로그인 시 플로팅메뉴 사진 url 전달
+    s3_current_user_profile_url = ""
+    if current_user.is_authenticated:
+        s3_current_user_profile_object = get_from_aws_s3([profile_foldername + '/' + current_user.profile_image])
+        s3_current_user_profile_url = s3_current_user_profile_object[0]['presigned_url']
+        #print(s3_current_user_profile_url)
 
     return render_template('home.html', posts=posts, s3_posts=s3_post_url_list, s3_profiles=s3_profile_url_list,
-                            title='Home', administrator_list=administrator_list)
+                            title='Home', administrator_list=administrator_list, s3_current_user=s3_current_user_profile_url)
 
 @app.route('/home/<string:username>')
 @login_required
@@ -236,9 +224,14 @@ def my_posts(username):
     s3_post_url_list = [s3_post_object['presigned_url'] for s3_post_object in s3_post_objects]
     s3_profile_url_list = [s3_profile_object['presigned_url'] for s3_profile_object in s3_profile_objects]
 
-    return render_template('home.html', posts=posts, s3_posts=s3_post_url_list, s3_profiles=s3_profile_url_list,
-                            title=username, administrator_list=administrator_list)
+    # 유저 로그인 시 플로팅메뉴 사진 url 전달
+    s3_current_user_profile_url = ""
+    if current_user.is_authenticated:
+        s3_current_user_profile_object = get_from_aws_s3([profile_foldername + '/' + current_user.profile_image])
+        s3_current_user_profile_url = s3_current_user_profile_object[0]['presigned_url']
 
+    return render_template('home.html', posts=posts, s3_posts=s3_post_url_list, s3_profiles=s3_profile_url_list,
+                            title=username, administrator_list=administrator_list, s3_current_user=s3_current_user_profile_url)
 
 
 @app.route('/create_post', methods=['GET', 'POST'])
@@ -267,9 +260,14 @@ def create_post():
 
         flash('새로운 추억이 생성되었습니다!', 'success')
         return redirect(url_for('home'))
-    post_image = url_for('static', filename='post_images/escape.jpg')
+
+    #post_image = url_for('static', filename=save_post_foldername + '/' + 'escape.jpg')# local
+    s3_post_object = get_from_aws_s3([save_post_foldername + '/' + 'escape.jpg'])
+    s3_post_url = s3_post_object[0]['presigned_url']
+
     legend = '추억 만들기'
-    return render_template('create_post.html', title='Create', form=form, post_image=post_image, legend=legend)
+    return render_template('create_post.html', title='Create', form=form, post_image=s3_post_url, legend=legend)# aws s3
+    #return render_template('create_post.html', title='Create', form=form, post_image=post_image, legend=legend)# local
 
 @app.route('/<int:post_id>/update_post', methods=['GET', 'POST'])
 @login_required
@@ -301,9 +299,13 @@ def update_post(post_id):
     else:
         abort(403)# 403 is "Forbidden" error
 
-    post_image = url_for('static', filename='post_images/'+selected_post.post_image)
+    #post_image = url_for('static', filename=save_post_foldername + '/' + selected_post.post_image)# local
+    s3_post_object = get_from_aws_s3([save_post_foldername + '/' + selected_post.post_image])
+    s3_post_url = s3_post_object[0]['presigned_url']
+    
     legend = '추억 업데이트'
-    return render_template('create_post.html', title='Update', form=form, post_image=post_image, legend=legend)
+    return render_template('create_post.html', title='Update', form=form, post_image=s3_post_url, legend=legend)# aws s3
+    #return render_template('create_post.html', title='Update', form=form, post_image=post_image, legend=legend)# local
 
 @app.route('/<int:post_id>/delete_post', methods=['GET', 'POST'])
 @login_required
@@ -344,8 +346,11 @@ def register():
         flash('회원가입이 완료되었습니다. 로그인을 해주시기 바랍니다.', 'success')
         return redirect(url_for('login'))
 
-    profile_image = url_for('static', filename='profile_images/howwwwwhy.png')
-    return render_template('/auth/register.html', title='Register', form=form, profile_image=profile_image)
+    #profile_image = url_for('static', filename=save_profile_foldername + '/' + 'howwwwwhy.png')# local
+    s3_profile_object = get_from_aws_s3([save_profile_foldername + '/' + 'howwwwwhy.png'])
+    s3_profile_url = s3_profile_object[0]['presigned_url']    
+    return render_template('/auth/register.html', title='Register', form=form, profile_image=s3_profile_url)# aws s3
+    #return render_template('/auth/register.html', title='Register', form=form, profile_image=profile_image)# local
 
 @app.route('/auth/login', methods=['GET', 'POST'])
 def login():
@@ -391,7 +396,10 @@ def account():
         flash('프로필이 업데이트 되었습니다.', 'success')
         return redirect(url_for('account'))     
 
+    #profile_image = url_for('static', filename=save_profile_foldername + '/' + current_user.profile_image)# local
+    s3_profile_object = get_from_aws_s3([save_profile_foldername + '/' + current_user.profile_image])
+    s3_profile_url = s3_profile_object[0]['presigned_url']
 
-    profile_image = url_for('static', filename='profile_images/'+current_user.profile_image)
     arrow_image = url_for('static', filename='page_images/green_arrow.png')
-    return render_template('account.html', title='Account', form=form, profile_image=profile_image, profile_image_after=profile_image, arrow_image=arrow_image)
+    return render_template('account.html', title='Account', form=form, profile_image=s3_profile_url, profile_image_after=s3_profile_url, arrow_image=arrow_image)# aws s3
+    #return render_template('account.html', title='Account', form=form, profile_image=profile_image, profile_image_after=profile_image, arrow_image=arrow_image)# local

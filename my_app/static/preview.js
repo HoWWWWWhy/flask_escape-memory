@@ -1,7 +1,6 @@
 const preview_box = document.querySelector(".js-preview-box");
 const preview_image = document.querySelector(".js-file-field");
 
-
 preview_image.onchange = (input) => {
     //console.log("onchange test");
     //console.log(input.target);

@@ -44,7 +44,8 @@
             </div>            
 
         </div> 
-        <script>file_name="{{ url_for('static', filename='profile_images/'+current_user.profile_image) }}"</script>
+        {# <script>file_url="{{ url_for('static', filename='profile_images/'+current_user.profile_image) }}"</script> #}
+        <script>file_url="{{ s3_current_user }}"</script>
         <script src="{{ url_for('static', filename='floating_menu.js') }}"></script>
     {% endif %}
 {% endblock content %}

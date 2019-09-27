@@ -79,7 +79,7 @@ def get_from_aws_s3(keys):
                 'Bucket': S3_BUCKET,
                 'Key': key
             },                                  
-            ExpiresIn=60
+            ExpiresIn=600
         )
         my_object['key'] = key
         my_object['presigned_url'] = url
